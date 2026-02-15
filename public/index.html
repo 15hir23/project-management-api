@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Management API — Web UI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 1rem; background: #1a1a2e; color: #eee; }
+    h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .muted { color: #888; font-size: 0.875rem; margin-bottom: 1.5rem; }
+    section { background: #16213e; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+    section h2 { margin: 0 0 0.75rem; font-size: 1rem; }
+    label { display: block; margin-bottom: 0.25rem; font-size: 0.875rem; }
+    input, select, button { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border: 1px solid #0f3460; background: #0f3460; color: #eee; }
+    input { width: 100%; max-width: 280px; }
+    button { cursor: pointer; background: #e94560; border: none; padding: 0.5rem 1rem; margin-right: 0.5rem; }
+    button.secondary { background: #0f3460; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: flex-end; }
+    .row label { margin-bottom: 0; }
+    pre { background: #0f3460; padding: 0.75rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem; white-space: pre-wrap; word-break: break-all; }
+    .error { color: #e94560; }
+    .success { color: #4ecca3; }
+  </style>
+</head>
+<body>
+  <h1>Project Management API — Web UI</h1>
+  <p class="muted">Optional testing UI. You can also use the terminal CLI: <code>npm run cli</code></p>
+
+  <section>
+    <h2>1. Create project</h2>
+    <div class="row">
+      <label>Name <input type="text" id="create-name" placeholder="Project name"></label>
+      <label>Client <input type="text" id="create-client" placeholder="Client name"></label>
+      <label>Start date <input type="date" id="create-start"></label>
+      <label>End date <input type="date" id="create-end" placeholder="Optional"></label>
+      <label>Status
+        <select id="create-status">
+          <option value="active">active</option>
+          <option value="on_hold">on_hold</option>
+          <option value="completed">completed</option>
+        </select>
+      </label>
+      <button onclick="createProject()">Create</button>
+    </div>
+    <pre id="create-out"></pre>
+  </section>
+
+  <section>
+    <h2>2. List projects</h2>
+    <div class="row">
+      <label>Status <select id="list-status"><option value="">All</option><option value="active">active</option><option value="on_hold">on_hold</option><option value="completed">completed</option></select></label>
+      <label>Search <input type="text" id="list-search" placeholder="name or client"></label>
+      <label>Sort <select id="list-sort"><option value="createdAt">createdAt</option><option value="startDate">startDate</option></select></label>
+      <label>Order <select id="list-order"><option value="desc">desc</option><option value="asc">asc</option></select></label>
+      <button onclick="listProjects()">List</button>
+    </div>
+    <pre id="list-out"></pre>
+  </section>
+
+  <section>
+    <h2>3. Get project by ID</h2>
+    <div class="row">
+      <label>ID <input type="text" id="get-id" placeholder="Project UUID"></label>
+      <button onclick="getProject()">Get</button>
+    </div>
+    <pre id="get-out"></pre>
+  </section>
+
+  <section>
+    <h2>4. Update status</h2>
+    <div class="row">
+      <label>ID <input type="text" id="status-id" placeholder="Project UUID"></label>
+      <label>New status <select id="status-value"><option value="active">active</option><option value="on_hold">on_hold</option><option value="completed">completed</option></select></label>
+      <button onclick="updateStatus()">Update</button>
+    </div>
+    <pre id="status-out"></pre>
+  </section>
+
+  <section>
+    <h2>5. Delete project (soft)</h2>
+    <div class="row">
+      <label>ID <input type="text" id="delete-id" placeholder="Project UUID"></label>
+      <button onclick="deleteProject()" class="secondary">Delete</button>
+    </div>
+    <pre id="delete-out"></pre>
+  </section>
+
+  <script>
+    const API = window.location.origin;
+
+    function out(id, text, isError) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = isError ? 'error' : '';
+    }
+
+    async function createProject() {
+      const name = document.getElementById('create-name').value.trim();
+      const clientName = document.getElementById('create-client').value.trim();
+      const startDate = document.getElementById('create-start').value;
+      const endDate = document.getElementById('create-end').value || null;
+      const status = document.getElementById('create-status').value;
+      const body = { name, clientName, startDate, status };
+      if (endDate) body.endDate = endDate;
+      try {
+        const res = await fetch(API + '/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (res.ok) out('create-out', JSON.stringify(data, null, 2)); else out('create-out', (data.error?.message || data) + '\n' + JSON.stringify(data, null, 2), true);
+      } catch (e) { out('create-out', e.message, true); }
+    }
+
+    async function listProjects() {
+      const status = document.getElementById('list-status').value;
+      const search = document.getElementById('list-search').value.trim();
+      const sort = document.getElementById('list-sort').value;
+      const order = document.getElementById('list-order').value;
+      const params = new URLSearchParams();
+      if (status) params.set('status', status);
+      if (search) params.set('search', search);
+      params.set('sort', sort);
+      params.set('order', order);
+      try {
+        const res = await fetch(API + '/projects?' + params);
+        const data = await res.json();
+        if (res.ok) out('list-out', JSON.stringify(data, null, 2)); else out('list-out', (data.error?.message || data) + '\n' + JSON.stringify(data, null, 2), true);
+      } catch (e) { out('list-out', e.message, true); }
+    }
+
+    async function getProject() {
+      const id = document.getElementById('get-id').value.trim();
+      if (!id) { out('get-out', 'Enter a project ID', true); return; }
+      try {
+        const res = await fetch(API + '/projects/' + encodeURIComponent(id));
+        const data = await res.json();
+        if (res.ok) out('get-out', JSON.stringify(data, null, 2)); else out('get-out', (data.error?.message || data) + '\n' + JSON.stringify(data, null, 2), true);
+      } catch (e) { out('get-out', e.message, true); }
+    }
+
+    async function updateStatus() {
+      const id = document.getElementById('status-id').value.trim();
+      const status = document.getElementById('status-value').value;
+      if (!id) { out('status-out', 'Enter a project ID', true); return; }
+      try {
+        const res = await fetch(API + '/projects/' + encodeURIComponent(id) + '/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+        const data = await res.json();
+        if (res.ok) out('status-out', JSON.stringify(data, null, 2)); else out('status-out', (data.error?.message || data) + '\n' + JSON.stringify(data, null, 2), true);
+      } catch (e) { out('status-out', e.message, true); }
+    }
+
+    async function deleteProject() {
+      const id = document.getElementById('delete-id').value.trim();
+      if (!id) { out('delete-out', 'Enter a project ID', true); return; }
+      if (!confirm('Soft-delete this project?')) return;
+      try {
+        const res = await fetch(API + '/projects/' + encodeURIComponent(id), { method: 'DELETE' });
+        if (res.status === 204) out('delete-out', 'Deleted (204 No Content)'); else { const data = await res.json(); out('delete-out', (data.error?.message || data) + '\n' + JSON.stringify(data, null, 2), true); }
+      } catch (e) { out('delete-out', e.message, true); }
+    }
+  </script>
+</body>
+</html>
