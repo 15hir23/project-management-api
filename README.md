@@ -422,7 +422,7 @@ Same actions as the CLI: create, list (with filters/sort), get by ID, update sta
 
 ### Tools Used
 
-- **Claude (AI assistant)**: Used to help implement the project structure, write code, and generate documentation.
+- **Cursor** (IDE with integrated AI): Used to implement the project structure, write code, generate documentation, and run commands. AI assistance (e.g. Claude) was used within Cursor for implementation and edits.
 
 ### What Was Generated vs. Modified
 
