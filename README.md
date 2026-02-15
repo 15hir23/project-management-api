@@ -2,6 +2,8 @@
 
 A RESTful API for managing internal projects. Built with Node.js and Express.
 
+**Live demo:** [https://project-management-api-ten.vercel.app](https://project-management-api-ten.vercel.app) (Web UI + API; data is in-memory and may not persist)
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -57,6 +59,10 @@ $env:PORT=3001; npm start
 Then open **http://localhost:3001** in your browser (or run `npm run cli` with `$env:API_URL="http://localhost:3001"` if using the CLI).
 
 ### Deploy on Vercel
+
+**Live demo:** [https://project-management-api-ten.vercel.app](https://project-management-api-ten.vercel.app)
+
+To deploy yourself:
 
 1. Push this repo to GitHub (if you haven’t).
 2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project** → import your `project-management-api` repo.
