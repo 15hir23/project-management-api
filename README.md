@@ -56,6 +56,16 @@ $env:PORT=3001; npm start
 
 Then open **http://localhost:3001** in your browser (or run `npm run cli` with `$env:API_URL="http://localhost:3001"` if using the CLI).
 
+### Deploy on Vercel
+
+1. Push this repo to GitHub (if you haven’t).
+2. Go to [vercel.com](https://vercel.com) → **Add New** → **Project** → import your `project-management-api` repo.
+3. Leave **Build Command** and **Output Directory** empty. Click **Deploy**.
+
+Vercel will detect the Express app from `src/app.js` ([Express on Vercel](https://vercel.com/guides/using-express-with-vercel)). The Web UI is served from the `public/` folder.
+
+**Note:** On Vercel the app runs as serverless functions. The **in-memory store does not persist** across requests or instances — data may be lost between requests. For a demo or assignment submission this is fine; for real persistence you’d add a database.
+
 ---
 
 ## Project Structure
